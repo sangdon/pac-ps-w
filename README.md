@@ -4,7 +4,7 @@
 
 ## Dataset Initialization
 ```
-ln -s <path-to-domainnet-dataset> domainnet
+ln -s <path-to-domainnet-dataset> data/domainnet
 ```
 
 ## Running
