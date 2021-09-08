@@ -1,4 +1,4 @@
-# PAC Prediction Sets under Covariate Shift
+# PAC Prediction Sets Under Covariate Shift
 
 ## DomainNet
 
