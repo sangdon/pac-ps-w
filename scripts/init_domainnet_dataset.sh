@@ -25,5 +25,5 @@ unzip -n -d $TARGET $TARGET/painting.zip
 unzip -n -d $TARGET $TARGET/quickdraw.zip
 unzip -n -d $TARGET $TARGET/real.zip
 unzip -n -d $TARGET $TARGET/sketch.zip
-
+python scripts/split_test_domainnet.py
 

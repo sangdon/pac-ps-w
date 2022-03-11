@@ -26,8 +26,8 @@ if __name__ == '__main__':
         data_val = [data[i] for i in i_rnd_val]
         data_test = [data[i] for i in i_rnd_test]
 
-        open(dn+'_val_split.txt', 'w').writelines(data_val)
-        open(dn+'_test_split.txt', 'w').writelines(data_test)
+        open(os.path.join(ROOT, dn+'_val_split.txt'), 'w').writelines(data_val)
+        open(os.path.join(ROOT, dn+'_test_split.txt'), 'w').writelines(data_test)
         
 
     
