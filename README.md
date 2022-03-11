@@ -26,3 +26,16 @@ ln -s <path-to-domainnet-dataset> data/domainnet
 ```
 ./demo.sh
 ```
+
+## Citation
+
+```
+@inproceedings{
+    park2022pac,
+    title={{PAC} Prediction Sets Under Covariate Shift},
+    author={Sangdon Park and Edgar Dobriban and Insup Lee and Osbert Bastani},
+    booktitle={International Conference on Learning Representations},
+    year={2022},
+    url={https://openreview.net/forum?id=DhP9L8vIyLc}
+}
+```
