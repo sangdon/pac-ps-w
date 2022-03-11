@@ -16,8 +16,10 @@ the following teaser summarizes our results.
 ## DomainNet Experiments
 
 ### Dataset Initialization
+First of all, we need to donwload and postprocess the [DomainNet](http://ai.bu.edu/M3SDA/) dataset; 
+the following script downloads the entire DomainNet datasets and holds out a validation set from a test set for you.
 ```
-ln -s <path-to-domainnet-dataset> data/domainnet
+./scripts/init_domainnet_dataset.sh
 ```
 
 ### Learning
