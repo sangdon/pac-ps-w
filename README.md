@@ -13,27 +13,26 @@ the following teaser summarizes our results.
 
 ![](.github/teaser.png)
 
-## Rate Shift Evaluation via DomainNet
+## DomainNet for Rate Shift
 
 DomainNet consists of six domains (e.g., ketch, clipart, painting, quickdraw, real, and infograph), each of which consists of images from 345 classes. 
 We consider the all domains as the source and each domain, including all domains, as a target. 
 Thus, we will have 7 adapted models as score functions of PAC prediction sets. 
 
 
-### Dataset Initialization
+### Dataset
 First of all, we need to donwload and postprocess the [DomainNet](http://ai.bu.edu/M3SDA/) dataset; 
 the following script downloads the entire DomainNet datasets and holds out a validation set from a test set for you.
 ```
 ./scripts/init_domainnet_dataset.sh
 ```
-### Model Initilization
+
+### Learning
 For each shift, we train a domain adapted classifier via [DANN](https://arxiv.org/pdf/1505.07818.pdf). 
 The trained models are provided in this repository and initialized via the following script. 
 ```
 ./scripts/init_models.sh
 ```
-
-### Learning
 
 ### Calibration
 ```
