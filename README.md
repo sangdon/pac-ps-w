@@ -40,17 +40,17 @@ To construct the PS-W prediction set on the shift from all domains to `clipart` 
 run the following command. 
 ```
 CUDA_VISIBLE_DEVICES=0 python3 main_cls_domainnet.py \
-   		    --exp_name my_demo \
-		    --data.src DomainNetAll \ 
-		    --data.tar DomainNetClipart \ 
-		    --train_predset.method pac_predset_worst_rejection \ 
-		    --data.seed None \ 
-		    --model_predset.eps 0.1 \ 
-		    --model_predset.delta 0.5e-5 \ 
-		    --model_iwcal.delta 0.5e-5 \ 
-		    --data.n_val_src 50000 \ 
-		    --model.path_pretrained snapshots_models/DomainNet/domainnet_src_DomainNetAll_tar_DomainNetClipart_dann/model_params_final_no_adv \
-		    --model_sd.path_pretrained snapshots_models/DomainNet/domainnet_src_DomainNetAll_tar_DomainNetClipart_dann/model_params_srcdisc_best 
+          --exp_name my_demo \
+          --data.src DomainNetAll \
+          --data.tar DomainNetClipart \
+          --train_predset.method pac_predset_worst_rejection \
+          --data.seed None \
+          --model_predset.eps 0.1 \
+          --model_predset.delta 0.5e-5 \
+          --model_iwcal.delta 0.5e-5 \
+          --data.n_val_src 50000 \
+          --model.path_pretrained snapshots_models/DomainNet/domainnet_src_DomainNetAll_tar_DomainNetClipart_dann/model_params_final_no_adv \
+          --model_sd.path_pretrained snapshots_models/DomainNet/domainnet_src_DomainNetAll_tar_DomainNetClipart_dann/model_params_srcdisc_best
 ```
 
 To run PS-W with 100 random trials (along with other baselines), run the following script.
