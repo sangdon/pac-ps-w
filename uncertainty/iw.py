@@ -1,13 +1,16 @@
 import os, sys
 import time
 import warnings
+import pickle
 
 from .util import *
-from learning import *
-from uncertainty import *
+#from learning import *
+#from uncertainty import *
 
+import learning
+import uncertainty
 
-class IWCalibrator(ClsLearner):
+class IWCalibrator(learning.ClsLearner):
     def __init__(self, mdl, params=None, name_postfix='iwcal'):
         super().__init__(mdl, params, name_postfix)
         
@@ -400,5 +403,157 @@ class IWBinningNaive(IWBinning):
 #         self.mdl.rate_lower_tar.data = tc.tensor(rate_lower_tar, device=self.params.device).float()
 #         self.mdl.rate_upper_tar.data = tc.tensor(rate_upper_tar, device=self.params.device).float()
 
-        
+
+def load_model_source_disc(args, mdl):
+
+    ## init the source discriminator model
+    print("## init models for iw: %s"%(args.model.sd))
+    mdl_sd = model.SourceDisc(getattr(model, args.model.sd)(args.model.feat_dim, 2), mdl)
+    assert(args.model_sd.path_pretrained is not None)
+    print(f'## load a pretrained source discriminator at {args.model_sd.path_pretrained}')
+    mdl_sd.load_state_dict(tc.load(args.model_sd.path_pretrained, map_location=tc.device('cpu')), strict=False)
+    mdl_sd.eval()
+    print()
+
+    return mdl_sd
+
+
+def init_iw_model(args, mdl_sd):
+    ## init the IW model
+    mdl_cal = model.NoCal(mdl_sd, cal_target=args.cal_sd.cal_target)    
+    mdl_iw = model.IW(mdl_cal, bound_type='mean') ## choose the uncalibrated iw
+    mdl_iw.eval()
+
+    return mdl_iw
+
+
+def est_iw_srcdisc(args, mdl, ds_dom):
     
+    ## load the pretrained source discriminator
+    mdl_sd = load_model_source_disc(args, mdl)
+
+    ## eval the source discriminator
+    l = learning.ClsLearner(mdl_sd, args.train_sd, name_postfix='srcdisc')
+    #print("## test...(skip)")
+    #l.test(ds_dom.test, ld_name='domain dataset', verbose=True)
+    print()
+
+    ## init an IW model
+    mdl_iw = init_iw_model(args, mdl_sd)
+    
+    ## estimate the maximum IW
+    fn_iw_max = os.path.join(os.path.dirname(args.model_sd.path_pretrained), f'iw_max_src_{args.data.src}_tar_{args.data.tar}_alpha_0.0.pk')
+    if os.path.exists(fn_iw_max):
+        iw_max = pickle.load(open(fn_iw_max, 'rb'))
+        print(f'## iw_max loaded from {fn_iw_max}')
+    else:
+        iw_max = uncertainty.estimate_iw_max(mdl_iw, ds_dom.train, args.device, alpha=0.0)
+        pickle.dump(iw_max, open(fn_iw_max, 'wb'))
+    mdl_iw.iw_max.data = tc.tensor(iw_max.item(), device=mdl_iw.iw_max.data.device)
+    print("## iw_max over train = %f (before cal)"%(iw_max))
+    print()
+
+    return args, mdl_iw
+
+
+def est_iw_temp(args, mdl, ds_dom):
+    ## load the pretrained source discriminator
+    mdl_sd = load_model_source_disc(args, mdl)
+
+    ## calibrate the source discriminator model via temperature scaling
+    mdl_sd = model.Temp(mdl_sd)
+    l = uncertainty.TempScalingLearner(mdl_sd, args.cal_sd, name_postfix='srcdisc_temp')
+    print("## test before calibration...")
+    l.test(ds_dom.test, ld_name='domain data', verbose=True)
+    print("## calibrate...")
+    l.train(ds_dom.val, ds_dom.val)
+    print("## test after calibration...")
+    l.test(ds_dom.test, ld_name='domain data', verbose=True)
+    print()
+
+    ## init an IW model
+    mdl_iw = init_iw_model(args, mdl_sd)
+
+    ## estimate the maximum IW before calibration
+    # always recompute the max since the max can be changed as a calibration set changes
+    iw_max = uncertainty.estimate_iw_max(mdl_iw, ds_dom.train, args.device)
+    mdl_iw.iw_max.data = tc.tensor(iw_max.item(), device=mdl_iw.iw_max.data.device)
+    print("## iw_max over train = %f (before cal)"%(iw_max))
+    print()
+
+    return args, mdl_iw
+
+
+def est_iw_bin_mean(args, mdl, ds_src, ds_tar):
+    
+    ## load the pretrained source discriminator
+    mdl_sd = load_model_source_disc(args, mdl)
+
+    ## eval the source discriminator
+    l = learning.ClsLearner(mdl_sd, args.train_sd, name_postfix='srcdisc')
+    #print("## test...(skip)")
+    #l.test(ds_dom.test, ld_name='domain dataset', verbose=True)
+    print()
+
+    ## init an IW model
+    mdl_iw = init_iw_model(args, mdl_sd)
+
+    ## calibrate the IW model
+    print("## calibrate IW...")
+
+    fn_bin_edges = os.path.join(os.path.dirname(args.model_sd.path_pretrained), f'bin_edges_n_bins_{args.model_iwcal.n_bins}_src_equal_mass.pk')
+
+    if os.path.exists(fn_bin_edges):
+        bin_edges = pickle.load(open(fn_bin_edges, 'rb'))
+        print(f'## bin_edges loaded from {fn_bin_edges}:', bin_edges)
+        assert(len(bin_edges) == args.model_iwcal.n_bins+1)
+    else:
+        bin_edges = uncertainty.find_bin_edges_equal_mass_src(ds_src.train, args.model_iwcal.n_bins, mdl_iw, args.device)
+        pickle.dump(bin_edges, open(fn_bin_edges, 'wb'))
+        print(f'## bin_edges saved to {fn_bin_edges}:', bin_edges)
+    args.cal_iw.bin_edges = bin_edges
+
+    mdl_iw = model.IWCal(mdl_iw, n_bins=args.model_iwcal.n_bins, delta=args.model_iwcal.delta)
+    l = uncertainty.IWBinningNaive(mdl_iw, args.cal_iw, name_postfix='iwcal_hist_naive')
+    l.train([ds_src.val, ds_tar.val])
+    #l.test([ds_src.test, ds_tar.test], ld_name='domain dataset', verbose=True)
+    print()
+
+    return args, mdl_iw
+
+
+def est_iw_bin_interval(args, mdl, ds_src, ds_tar):
+
+    ## load the pretrained source discriminator
+    mdl_sd = load_model_source_disc(args, mdl)
+
+    ## eval the source discriminator
+    l = learning.ClsLearner(mdl_sd, args.train_sd, name_postfix='srcdisc')
+    #print("## test...(skip)")
+    #l.test(ds_dom.test, ld_name='domain dataset', verbose=True)
+    print()
+
+    ## init an IW model
+    mdl_iw = init_iw_model(args, mdl_sd)
+
+    ## calibrate the IW model
+    print("## calibrate IWs...")
+    fn_bin_edges = os.path.join(os.path.dirname(args.model_sd.path_pretrained), f'bin_edges_n_bins_{args.model_iwcal.n_bins}_src_equal_mass.pk')
+
+    if os.path.exists(fn_bin_edges):
+        bin_edges = pickle.load(open(fn_bin_edges, 'rb'))
+        print(f'## bin_edges is loaded from {fn_bin_edges}:', bin_edges)
+        assert(len(bin_edges) == args.model_iwcal.n_bins+1)
+    else:
+        bin_edges = uncertainty.find_bin_edges_equal_mass_src(ds_src.train, args.model_iwcal.n_bins, mdl_iw, args.device)
+        pickle.dump(bin_edges, open(fn_bin_edges, 'wb'))
+        print(f'## bin_edges is saved to {fn_bin_edges}:', bin_edges)
+    args.cal_iw.bin_edges = bin_edges
+
+    mdl_iw = model.IWCal(mdl_iw, n_bins=args.model_iwcal.n_bins, delta=args.model_iwcal.delta)
+    l = uncertainty.IWBinning(mdl_iw, args.cal_iw, name_postfix='iwcal_hist')
+    l.train([ds_src.val, ds_tar.val])
+    #l.test([ds_src.test, ds_tar.test], ld_name='domain dataset', verbose=True)
+    print()
+
+    return args, mdl_iw

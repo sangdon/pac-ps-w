@@ -2,10 +2,6 @@ import os, sys
 import numpy as np
 import math
 
-from scipy import stats
-from rpy2.robjects.packages import importr
-stats = importr('stats')
-
 import torch as tc
 
 import matplotlib
@@ -312,12 +308,17 @@ def estimate_mean_worst_emp_bernstein(mean_emp, std_emp_unbiased, n, a, b, delta
     return mean_worst
 
 
-def bci_clopper_pearson(k, n, alpha, two_side=True, use_R=True):
+def bci_clopper_pearson(k, n, alpha, two_side=True, use_R=False):
     if two_side:
-        if use_R:
+        if use_R: # R is numerically better when alpha is small
+            from rpy2.robjects.packages import importr
+            stats = importr('stats')
+
             lo = stats.qbeta(alpha/2, int(k), int(n-k+1))[0]
             hi = stats.qbeta(1 - alpha/2, int(k+1), int(n-k))[0]
         else:
+            from scipy import stats
+
             lo = stats.beta.ppf(alpha/2, k, n-k+1)
             hi = stats.beta.ppf(1 - alpha/2, k+1, n-k)
         
@@ -326,9 +327,14 @@ def bci_clopper_pearson(k, n, alpha, two_side=True, use_R=True):
     
         return lo, hi
     else:
-        if use_R:
+        if use_R: # R is numerically better when alpha is small
+            from rpy2.robjects.packages import importr
+            stats = importr('stats')
+
             hi = stats.qbeta(1 - alpha, int(k+1), int(n-k))[0]
-        else:    
+        else:
+            from scipy import stats
+
             hi = stats.beta.ppf(1 - alpha, k+1, n-k)
             hi = 1.0 if math.isnan(hi) else hi
     
@@ -363,33 +369,6 @@ def estimate_iw_max(mdl_iw, ld, device, alpha=0.0):
     iw_max = iw_sorted[math.ceil(len(iw_list)*(1.0 - alpha))-1]
     return iw_max
 
-# def find_bin_edges_equal_src(ld_list_train, n_bins, mdl, device):
-#     ## compute iw using training set
-    
-#     assert(len(ld_list_train) == 2)
-#     w_list_train = []
-#     for (x1, _), (x2, _) in zip(ld_list_train[0], ld_list_train[1]):
-#         x1, x2 = x1.to(device), x2.to(device)
-#         with tc.no_grad():
-#             w1 = mdl(x1)
-#             w2 = mdl(x2)
-
-#         w_list_train.append(w1)
-#         w_list_train.append(w2)
-
-#     # for ld_train in ld_list_train:
-#     #     for x, _ in ld_train:
-#     #         x = x.to(device)
-#     #         with tc.no_grad():
-#     #             w = mdl(x)
-#     #         w_list_train.append(w)
-#     w_list_train = tc.cat(w_list_train).cpu().detach().numpy()
-
-#     bin_edges = binedges_equalmass(w_list_train, n_bins)
-#     bin_edges[0] = 0.0
-#     bin_edges[-1] = np.inf
-#     return bin_edges
-
 
 def find_bin_edges_equal_mass_src(ld_train, n_bins, mdl, device):
     ## compute iw using training set
@@ -406,31 +385,3 @@ def find_bin_edges_equal_mass_src(ld_train, n_bins, mdl, device):
     bin_edges[-1] = np.inf
     return bin_edges
 
-
-def find_bin_edges_equal_src_tar(ld_train_src, ld_train_tar, n_bins, mdl, device):
-    ## compute iw using training set
-
-    w_list_train_src = []
-    for x, _ in ld_train_src:
-        x = x.to(device)
-        with tc.no_grad():
-            w = mdl(x)
-        w_list_train_src.append(w)
-    w_list_train_src = tc.cat(w_list_train_src)
-    
-    w_list_train_tar = []
-    for x, _ in ld_train_tar:
-        x = x.to(device)
-        with tc.no_grad():
-            w = mdl(x)
-        w_list_train_tar.append(w)
-    w_list_train_tar = tc.cat(w_list_train_tar)
-
-    ## prefer bin edge splits by source information
-    w_list_train = tc.cat([w_list_train_src, w_list_train_tar[:len(w_list_train_src)]]).cpu().detach().numpy()
-
-
-    bin_edges = binedges_equalmass(w_list_train, n_bins)
-    bin_edges[0] = 0.0
-    bin_edges[-1] = np.inf
-    return bin_edges

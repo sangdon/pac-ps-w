@@ -57,12 +57,6 @@ def neg_log_prob(yhs, yhs_logvar, ys, var_min=1e-16):
     d = ys.size(1)
     yhs_var = tc.max(yhs_logvar.exp(), tc.tensor(var_min, device=yhs_logvar.device))
     loss_mah = 0.5 * dist_mah(ys, yhs, 1/yhs_var, sqrt=False)
-    # if not all(loss_mah >= 0):
-    #     print('loss_mah', loss_mah)
-    #     print('ys', ys)
-    #     print('yhs', yhs)
-    #     print('yhs_var', yhs_var)
-    #     print('yhs_logvar', yhs_logvar)
     assert(all(loss_mah >= 0))
     loss_const = 0.5 * np.log(2.0 * np.pi) * d
     loss_logdet = 0.5 * yhs_logvar.sum(1)
@@ -70,12 +64,6 @@ def neg_log_prob(yhs, yhs_logvar, ys, var_min=1e-16):
 
     return loss
 
-# def g(grad):
-#     print('grad_prev:', grad)
-#     grad = -grad
-#     print('grad_post:', grad)
-
-#     return grad
 
 class GradReversalLayer(nn.Module):
     def __init__(self):
