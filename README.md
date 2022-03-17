@@ -34,9 +34,28 @@ The trained models are provided in this repository and initialized via the follo
 ./scripts/init_models.sh
 ```
 
-### Calibration
+### PAC Prediction Set Construction
+
+To construct the PS-W prediction set on the shift from all domains to `clipart` with `\epsilon=0.1`, `\delta_C=0.5^{-5}`, `\delta_w=0.5^{-5}`, and `m=50,000`, 
+run the following command. 
 ```
-./demo.sh
+CUDA_VISIBLE_DEVICES=0 python3 main_cls_domainnet.py \
+          --exp_name my_demo \
+          --data.src DomainNetAll \
+          --data.tar DomainNetClipart \
+          --train_predset.method pac_predset_worst_rejection \
+          --data.seed None \
+          --model_predset.eps 0.1 \
+          --model_predset.delta 0.5e-5 \
+          --model_iwcal.delta 0.5e-5 \
+          --data.n_val_src 50000 \
+          --model.path_pretrained snapshots_models/DomainNet/domainnet_src_DomainNetAll_tar_DomainNetClipart_dann/model_params_final_no_adv \
+          --model_sd.path_pretrained snapshots_models/DomainNet/domainnet_src_DomainNetAll_tar_DomainNetClipart_dann/model_params_srcdisc_best
+```
+
+To run PS-W with 100 random trials (along with other baselines), run the following script.
+```
+./scripts/run_main_cls_domainnet_da_all2clipart.sh
 ```
 
 ## Citation
