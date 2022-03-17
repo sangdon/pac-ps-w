@@ -39,7 +39,7 @@ the following script downloads the entire DomainNet datasets and holds out a val
 ./scripts/init_domainnet_dataset.sh
 ```
 
-### Learning
+### Score Function Learning
 For each shift, we train a domain adapted classifier via [DANN](https://arxiv.org/pdf/1505.07818.pdf). 
 The trained models are provided in this repository and initialized via the following script. 
 ```
