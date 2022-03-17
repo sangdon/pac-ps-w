@@ -54,25 +54,25 @@ if __name__ == '__main__':
         ]
     else:    
          method_name_list = [
-            #('desired', 'upper bound'),
-            #('desired_eff', 'desired-eff'),
-            ('naive', 'CP-IID'),
-            ('wscp', 'WSCP'),
-            ('worstiw', 'CP-C'),
-            #('worstbinopt2', 'WBO-2E'),
-            #('worstbinopt5', 'WBO-5E'),
-            #('mgf2', 'MGF-2E'),
-            #('mgf10', 'MGF-10E'),
-            #('HCP', 'CP+H'),
-            #('EBCP', 'CP+EB'),
-            #('wbin', 'CP+IWBin'),
+             #('desired', 'upper bound'),
+             #('desired_eff', 'desired-eff'),
+             ('naive', 'CP-IID'),
+             ('wscp', 'WSCP'),
+             ('worstiw', 'CP-C'),
+             #('worstbinopt2', 'WBO-2E'),
+             #('worstbinopt5', 'WBO-5E'),
+             #('mgf2', 'MGF-2E'),
+             #('mgf10', 'MGF-10E'),
+             #('HCP', 'CP+H'),
+             #('EBCP', 'CP+EB'),
+             #('wbin', 'CP+IWBin'),
              
-            #('resample', 'resample'),
-            #('bootstrap', 'BS'),
-            #('resampling_bootstrap', 'BS-IR'),
+             #('resample', 'resample'),
+             #('bootstrap', 'BS'),
+             #('resampling_bootstrap', 'BS-IR'),
              
-            ('rejection', 'RSCP'),
-            ('worst_rejection', 'RSCP-WIW'),
+             ('rejection', 'RSCP'),
+             ('worst_rejection', 'RSCP-WIW'),
         ]
     exp_name_list = ['exp_' + args.dataset + '_' + n[0] + f'_m_{args.m}_eps_{args.eps}_delta_{args.delta}' for n in method_name_list]
     name_list = [n[1] for n in method_name_list]

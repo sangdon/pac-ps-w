@@ -41,10 +41,10 @@ do
 			--model_sd.path_pretrained $SDMDLPATH 
     # PS-C
     CUDA_VISIBLE_DEVICES=$GPU_ID python3 main_cls_domainnet.py \
-			--exp_name exp_${EXPNAME}_worstiw_m_${M}_eps_${EPS}_delta_${DELTA}_expid_$i \
+			--exp_name exp_${EXPNAME}_maxiw_m_${M}_eps_${EPS}_delta_${DELTA}_expid_$i \
 			--data.src $SRC \
 			--data.tar $TAR \
-			--train_predset.method pac_predset_worstiw \
+			--train_predset.method pac_predset_maxiw \
 			--data.seed None \
 			--model_predset.eps $EPS \
 			--model_predset.delta $DELTA \

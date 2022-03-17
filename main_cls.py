@@ -240,7 +240,7 @@ def run(args):
     ## construct and evaluate a prediction set
     if args.train_predset.method == 'pac_predset':
         # construct a prediction set
-        mdl_predset = model.PredSetCls(mdl, args.model_predset.eps, args.model_predset.delta, args.model_predset.n)
+        mdl_predset = model.PredSetCls(mdl, args.model_predset.eps, args.model_predset.delta, args.model_predset.m)
         l = uncertainty.PredSetConstructor(mdl_predset, args.train_predset, model_iw=None)
         l.train(ds_src.val)
         # evaluate
@@ -248,7 +248,7 @@ def run(args):
         
     elif args.train_predset.method == 'pac_predset_CP':
         # construct a prediction set
-        mdl_predset = model.PredSetCls(mdl, args.model_predset.eps, args.model_predset.delta, args.model_predset.n)
+        mdl_predset = model.PredSetCls(mdl, args.model_predset.eps, args.model_predset.delta, args.model_predset.m)
         l = uncertainty.PredSetConstructor_CP(mdl_predset, args.train_predset, model_iw=None)
         l.train(ds_src.val)
         # evaluate
@@ -256,7 +256,7 @@ def run(args):
         
     elif args.train_predset.method == 'split_cp':
         # construct a prediction set
-        mdl_predset = model.SplitCPCls(mdl, args.model_predset.alpha, args.model_predset.delta, args.model_predset.n)
+        mdl_predset = model.SplitCPCls(mdl, args.model_predset.alpha, args.model_predset.delta, args.model_predset.m)
         l = uncertainty.SplitCPConstructor(mdl_predset, args.train_predset)
         l.train(ds_src.val)
         # evaluate
@@ -264,29 +264,29 @@ def run(args):
         
     elif args.train_predset.method == 'weighted_split_cp':
         # estimate IWs
-        args, mdl_iw = est_iw_bin_srcdisc(args, mdl, ds_dom)
+        args, mdl_iw = uncertainty.est_iw_srcdisc(args, mdl, ds_dom)
         # construct a prediction set
-        mdl_predset = model.WeightedSplitCPCls(mdl, mdl_iw, args.model_predset.alpha, args.model_predset.delta, args.model_predset.n)
+        mdl_predset = model.WeightedSplitCPCls(mdl, mdl_iw, args.model_predset.alpha, args.model_predset.delta, args.model_predset.m)
         l = uncertainty.WeightedSplitCPConstructor(mdl_predset, params=args.train_predset, mdl_iw=mdl_iw)
         l.train(ds_src.val)
         # evaluate
         l.test(ds_tar.test, ld_name=args.data.tar, verbose=True)
         
-    elif args.train_predset.method == 'pac_predset_worstiw':
+    elif args.train_predset.method == 'pac_predset_maxiw':
         # estimate IWs
-        args, mdl_iw = est_iw_bin_srcdisc(args, mdl, ds_dom)
+        args, mdl_iw = uncertainty.est_iw_srcdisc(args, mdl, ds_dom)
         # construct a prediction set
-        mdl_predset = model.PredSetCls(mdl, args.model_predset.eps, args.model_predset.delta, args.model_predset.n)
-        l = uncertainty.PredSetConstructor_worstiw(mdl_predset, args.train_predset, model_iw=mdl_iw)
+        mdl_predset = model.PredSetCls(mdl, args.model_predset.eps, args.model_predset.delta, args.model_predset.m)
+        l = uncertainty.PredSetConstructor_maxiw(mdl_predset, args.train_predset, model_iw=mdl_iw)
         l.train(ds_src.val)
         # evaluate
         l.test(ds_tar.test, ld_name=args.data.tar, verbose=True)
         
     elif args.train_predset.method == 'pac_predset_rejection':
         # estimate IWs
-        args, mdl_iw = est_iw_bin_srcdisc(args, mdl, ds_dom)
+        args, mdl_iw = uncertainty.est_iw_srcdisc(args, mdl, ds_dom)
         # construct a prediction set
-        mdl_predset = model.PredSetCls(mdl, args.model_predset.eps, args.model_predset.delta, args.model_predset.n)
+        mdl_predset = model.PredSetCls(mdl, args.model_predset.eps, args.model_predset.delta, args.model_predset.m)
         l = uncertainty.PredSetConstructor_rejection(mdl_predset, args.train_predset, model_iw=mdl_iw)
         l.train(ds_src.val)
         # evaluate
@@ -294,9 +294,9 @@ def run(args):
         
     elif args.train_predset.method == 'pac_predset_temp_rejection':
         # estimate IWs
-        est_iw_temp(args, mdl, ds_dom)
+        args, mdl_iw = uncertainty.est_iw_temp(args, mdl, ds_dom)
         # construct a prediction set
-        mdl_predset = model.PredSetCls(mdl, args.model_predset.eps, args.model_predset.delta, args.model_predset.n)
+        mdl_predset = model.PredSetCls(mdl, args.model_predset.eps, args.model_predset.delta, args.model_predset.m)
         l = uncertainty.PredSetConstructor_rejection(mdl_predset, args.train_predset, model_iw=mdl_iw)
         l.train(ds_src.val)
         # evaluate
@@ -304,9 +304,9 @@ def run(args):
 
     elif args.train_predset.method == 'pac_predset_mean_rejection':
         # estimate IWs
-        args, mdl_iw = est_iw_bin_mean(args, mdl, ds_src, ds_tar)
+        args, mdl_iw = uncertainty.est_iw_bin_mean(args, mdl, ds_src, ds_tar)
         # construction a prediction set
-        mdl_predset = model.PredSetCls(mdl, args.model_predset.eps, args.model_predset.delta, args.model_predset.n)
+        mdl_predset = model.PredSetCls(mdl, args.model_predset.eps, args.model_predset.delta, args.model_predset.m)
         l = uncertainty.PredSetConstructor_rejection(mdl_predset, args.train_predset, model_iw=mdl_iw)
         l.train(ds_src.val)
         # evaluate
@@ -314,9 +314,9 @@ def run(args):
     
     elif args.train_predset.method == 'pac_predset_worst_rejection':
         # estimate IWs
-        args, mdl_iw = est_iw_bin_interval(args, mdl, ds_src, ds_tar)
+        args, mdl_iw = uncertainty.est_iw_bin_interval(args, mdl, ds_src, ds_tar)
         # construction a prediction set
-        mdl_predset = model.PredSetCls(mdl, args.model_predset.eps, args.model_predset.delta, args.model_predset.n)
+        mdl_predset = model.PredSetCls(mdl, args.model_predset.eps, args.model_predset.delta, args.model_predset.m)
         l = uncertainty.PredSetConstructor_worst_rejection(mdl_predset, args.train_predset, model_iw=mdl_iw)
         l.train(ds_src.val)
         # evaluate
@@ -376,7 +376,7 @@ def parse_args():
     parser.add_argument('--model_predset.eps', type=float, default=0.1)
     parser.add_argument('--model_predset.alpha', type=float, default=0.1)
     parser.add_argument('--model_predset.delta', type=float, default=1e-5)
-    parser.add_argument('--model_predset.n', type=int)
+    parser.add_argument('--model_predset.m', type=int)
 
     ## train args
     parser.add_argument('--train.rerun', action='store_true')

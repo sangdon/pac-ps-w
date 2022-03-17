@@ -9,6 +9,7 @@ from .util import *
 
 import learning
 import uncertainty
+import model
 
 class IWCalibrator(learning.ClsLearner):
     def __init__(self, mdl, params=None, name_postfix='iwcal'):

@@ -16,7 +16,7 @@ from .util import *
     
     
 
-class PredSetConstructor_worstiw(PredSetConstructor_CP):
+class PredSetConstructor_maxiw(PredSetConstructor_CP):
     def __init__(self, model, params=None, model_iw=None, name_postfix=None):
         super().__init__(model=model, params=params, model_iw=model_iw, name_postfix=name_postfix)
 
