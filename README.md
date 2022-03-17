@@ -36,7 +36,7 @@ The trained models are provided in this repository and initialized via the follo
 
 ### PAC Prediction Set Construction
 
-To construct the PS-W prediction set on the shift from all domains to `clipart` with `\epsilon=0.1`, `\delta_C=0.5^{-5}`, `\delta_w=0.5^{-5}`, and `m=50,000`, 
+To construct the `PS-W` prediction set on the shift from all domains to `clipart` with `\epsilon=0.1`, `\delta_C=0.5^{-5}`, `\delta_w=0.5^{-5}`, and `m=50,000`, 
 run the following command. 
 ```
 CUDA_VISIBLE_DEVICES=0 python3 main_cls_domainnet.py \
@@ -53,10 +53,25 @@ CUDA_VISIBLE_DEVICES=0 python3 main_cls_domainnet.py \
           --model_sd.path_pretrained snapshots_models/DomainNet/domainnet_src_DomainNetAll_tar_DomainNetClipart_dann/model_params_srcdisc_best
 ```
 
-To run PS-W with 100 random trials (along with other baselines), run the following script.
+To run `PS-W` with 100 random trials (along with other baselines), run the following script.
 ```
 ./scripts/run_main_cls_domainnet_da_all2clipart.sh
 ```
+
+The core of `PS-W` consists of the following three steps:
+```
+# Step 1: estimate IWs                                                                                                                                     
+args, mdl_iw = uncertainty.est_iw_bin_interval(args, mdl, ds_src, ds_tar)
+
+# Step 2: construct a prediction set via rejection sampling with the worst IWs
+mdl_predset = model.PredSetCls(mdl, args.model_predset.eps, args.model_predset.delta, args.model_predset.m)
+l = uncertainty.PredSetConstructor_worst_rejection(mdl_predset, args.train_predset, model_iw=mdl_iw)
+l.train(ds_src.val)
+
+# Step 3: evaluate the constructed prediction set
+l.test(ds_tar.test, ld_name=args.data.tar, verbose=True)
+```
+
 
 ## Citation
 
