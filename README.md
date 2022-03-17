@@ -7,11 +7,14 @@ A PAC prediction set is a prediction set that satisfies the probably approximate
 
 The PAC prediction set is a promising way to measure the uncertainty of predictions, while making correctness guarantee; but 
 it relies on the i.i.d. assumption, i.e., labeled examples are independent and identically distributed, which is easily broken in practice due to covariate shift, as shown in the follwoing:
-![](.github/covshift.png)
+
+<p align="center">
+          <img src=".github/covshift.png" width="500">
+
 
 We propose a PAC prediction set algorithm that satisfies the PAC guarantee under covariate shift, while minimizing the expected set size; 
 the following teaser summarizes our results.
-![](.github/teaser.png)
+<p align="center"><img src=".github/teaser.png" width="800">
 
 ## DomainNet for Rate Shift
 
