@@ -5,16 +5,25 @@ This repository is the PyTorch implementation of
 A prediction set is a set-valued function that returns a subset of labels, where the set size represents the uncertainty of the prediction. 
 A PAC prediction set is a prediction set that satisfies the probably approximately correct (PAC) guarantee, introduced by Wilks (1941) and Valiant (1984). 
 
+## Motivation
+
 The PAC prediction set is a promising way to measure the uncertainty of predictions, while making correctness guarantee; but 
 it relies on the i.i.d. assumption, i.e., labeled examples are independent and identically distributed, which is easily broken in practice due to covariate shift, as shown in the follwoing:
 
-<p align="center">
-          <img src=".github/covshift.png" width="500">
+<p align="center"><img src=".github/covshift.png" width="500">
 
 
-We propose a PAC prediction set algorithm that satisfies the PAC guarantee under covariate shift, while minimizing the expected set size; 
-the following teaser summarizes our results.
+## Our Method: PS-W
+          
+We propose a PAC prediction set algorithm `PS-W` that satisfies the PAC guarantee under covariate shift, while minimizing the expected set size. 
+In particular, `PS-W` exploits rejection sampling with the worst importance weights (IWs) from estimated IW intervals.
+          
+<p align="center"><img src=".github/ps-w.png" width="500">
+          
+The following teaser summarizes our results.
 <p align="center"><img src=".github/teaser.png" width="800">
+          
+          
 
 ## DomainNet for Rate Shift
 
