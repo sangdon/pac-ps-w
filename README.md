@@ -70,7 +70,7 @@ To run `PS-W` with 100 random trials (along with other baselines), run the follo
 ./scripts/run_main_cls_domainnet_da_all2clipart.sh
 ```
 
-The core of `PS-W` consists of the following three steps:
+The `PS-W` implementation consists of the following three steps:
 ```
 # Step 1: estimate IWs                                                                                                                                     
 args, mdl_iw = uncertainty.est_iw_bin_interval(args, mdl, ds_src, ds_tar)
