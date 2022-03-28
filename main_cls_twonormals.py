@@ -32,25 +32,25 @@ def parse_args():
     parser.add_argument('--data.n_workers', type=int, default=16)
     parser.add_argument('--data.src', type=str, required=True)
     parser.add_argument('--data.tar', type=str, required=True)
-    parser.add_argument('--data.n_labels', type=int, default=345)
-    parser.add_argument('--data.img_size', type=int, nargs=3, default=(3, 224, 224))
-    parser.add_argument('--data.dim', type=int, nargs='*')
+    parser.add_argument('--data.n_labels', type=int, default=2)
+    #parser.add_argument('--data.img_size', type=int, nargs=3, default=(2048))
+    parser.add_argument('--data.dim', type=int, nargs='*', default=[2048])
     #parser.add_argument('--data.aug_src', type=str, nargs='*')
     #parser.add_argument('--data.aug_tar', type=str, nargs='*')
-    parser.add_argument('--data.n_train_src', type=int)
-    parser.add_argument('--data.n_train_tar', type=int)
-    parser.add_argument('--data.n_val_src', type=int, default=20000)
-    parser.add_argument('--data.n_val_tar', type=int)
-    parser.add_argument('--data.n_test_src', type=int)
-    parser.add_argument('--data.n_test_tar', type=int)
+    parser.add_argument('--data.n_train_src', type=int, default=50000)
+    parser.add_argument('--data.n_train_tar', type=int, default=50000)
+    parser.add_argument('--data.n_val_src', type=int, default=50000)
+    parser.add_argument('--data.n_val_tar', type=int, default=50000)
+    parser.add_argument('--data.n_test_src', type=int, default=50000)
+    parser.add_argument('--data.n_test_tar', type=int, default=50000)
     parser.add_argument('--data.seed', type=lambda v: None if v=='None' else int(v), default=0)
     parser.add_argument('--data.load_feat', type=str)
 
     ## model args
-    parser.add_argument('--model.base', type=str, default='ResNet101')
-    parser.add_argument('--model.base_feat', type=str, default='ResNetFeat')
+    parser.add_argument('--model.base', type=str, default='Linear')
+    #parser.add_argument('--model.base_feat', type=str, default='ResNetFeat')
     parser.add_argument('--model.path_pretrained', type=str)
-    parser.add_argument('--model.feat_dim', type=int, default=2048)
+    #parser.add_argument('--model.feat_dim', type=int, default=2048)
     parser.add_argument('--model.cal', type=str, default='Temp')
     parser.add_argument('--model.sd', type=str, default='MidFNN')
     parser.add_argument('--model.sd_cal', type=str, default='HistBin')
@@ -65,7 +65,7 @@ def parse_args():
     parser.add_argument('--model_predset.eps', type=float, default=0.1)
     parser.add_argument('--model_predset.alpha', type=float, default=0.1)
     parser.add_argument('--model_predset.delta', type=float, default=1e-5)
-    parser.add_argument('--model_predset.m', type=int)
+    parser.add_argument('--model_predset.m', type=int, default=50000)
 
     ## train args
     parser.add_argument('--train.rerun', action='store_true')
@@ -131,13 +131,7 @@ def parse_args():
     args = util.propagate_args(args, 'exp_name')
     args = util.propagate_args(args, 'snapshot_root')
 
-    assert('DomainNet' in args.data.src)
-    if args.data.n_val_tar is None and args.data.tar == 'DomainNetAll':
-        args.data.n_val_tar = args.data.n_val_src 
-    if args.model_predset.m is None:
-        args.model_predset.m = args.data.n_val_src
-    else:
-        assert(args.model_predset.m <= args.data.n_val_src)
+    assert(args.model_predset.m <= args.data.n_val_src)
 
     ## set loggers
     os.makedirs(os.path.join(args.snapshot_root, args.exp_name), exist_ok=True)

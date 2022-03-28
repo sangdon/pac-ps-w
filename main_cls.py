@@ -14,39 +14,6 @@ import learning
 import uncertainty
 
 
-class IWTwoNormals(tc.nn.Module):
-    def __init__(self, p_params, q_params, device):
-        super().__init__()
-        dim = p_params['mu'].shape[0]
-        self.p_normal = tc.distributions.LowRankMultivariateNormal(p_params['mu'].to(device),
-                                                                   tc.zeros(dim, dim, device=device),
-                                                                   p_params['sig'].to(device)**2)
-        self.q_normal = tc.distributions.LowRankMultivariateNormal(q_params['mu'].to(device),
-                                                                   tc.zeros(dim, dim, device=device),
-                                                                   q_params['sig'].to(device)**2)
-
-        ## max iw
-        assert(all(p_params['mu'] == q_params['mu']))
-        x = p_params['mu'].to(device)
-        p_logprob = self.p_normal.log_prob(x)
-        q_logprob = self.q_normal.log_prob(x)
-
-        iw_log = q_logprob - p_logprob
-        self.iw_max = iw_log.squeeze().exp()
-
-        
-    def forward(self, x, y=None, training=False):
-        if training:
-            self.train()
-        else:
-            self.eval()
-
-        p_logprob = self.p_normal.log_prob(x)
-        q_logprob = self.q_normal.log_prob(x)
-
-        iw_log = q_logprob - p_logprob
-        return iw_log.squeeze().exp()
-
     
 def run(args):
 
@@ -58,8 +25,8 @@ def run(args):
         image_size=None if args.data.img_size is None else args.data.img_size[1],
         dim=args.data.dim,
         train_rnd=True, val_rnd=True, test_rnd=False, 
-        train_aug=args.data.aug_src is not None, val_aug=args.data.aug_src is not None, test_aug=args.data.aug_src is not None,
-        aug_types=args.data.aug_src,
+        #train_aug=args.data.aug_src is not None, val_aug=args.data.aug_src is not None, test_aug=args.data.aug_src is not None,
+        #aug_types=args.data.aug_src,
         color=True if args.data.img_size is not None and args.data.img_size[0]==3 else False,
         sample_size={'train': args.data.n_train_src, 'val': args.data.n_val_src, 'test': args.data.n_test_src},
         seed=args.data.seed,
@@ -76,8 +43,8 @@ def run(args):
         image_size=None if args.data.img_size is None else args.data.img_size[1],
         dim=args.data.dim,
         train_rnd=True, val_rnd=True, test_rnd=False, 
-        train_aug=args.data.aug_tar is not None, val_aug=args.data.aug_tar is not None, test_aug=args.data.aug_tar is not None,
-        aug_types=args.data.aug_tar,
+        #train_aug=args.data.aug_tar is not None, val_aug=args.data.aug_tar is not None, test_aug=args.data.aug_tar is not None,
+        #aug_types=args.data.aug_tar,
         color=True if args.data.img_size is not None and args.data.img_size[0]==3 else False,
         sample_size={'train': args.data.n_train_tar, 'val': args.data.n_val_tar, 'test': args.data.n_test_tar},
         seed=args.data.seed,
@@ -116,125 +83,125 @@ def run(args):
     #l.test(ds_tar.test, ld_name=args.data.tar, verbose=True)
     print()
 
-    ## IW
-    ## use true iw
-    if args.model.iw_true:
-        ## load true IW
-        assert('Normal' in args.data.src and 'Normal' in args.data.tar)
-        if args.data.src == 'FatNormal':
-            mu = tc.zeros(args.data.dim)
-            sig = tc.ones(args.data.dim) * 1e-1 # 1e-4
-            sig[0] = 5.0
-            p_params = {'mu': mu, 'sig': sig}
-        elif args.data.src == 'ThinNormal':
-            mu = tc.zeros(args.data.dim)
-            sig = tc.ones(args.data.dim) * 1e-1 # 1e-4
-            sig[0] = 1.0
-            p_params = {'mu': mu, 'sig': sig}
-        else:
-            raise NotImplementedError
+    # ## IW
+    # ## use true iw
+    # if args.model.iw_true:
+    #     ## load true IW
+    #     assert('Normal' in args.data.src and 'Normal' in args.data.tar)
+    #     if args.data.src == 'FatNormal':
+    #         mu = tc.zeros(args.data.dim)
+    #         sig = tc.ones(args.data.dim) * 1e-1
+    #         sig[0] = 5.0
+    #         p_params = {'mu': mu, 'sig': sig}
+    #     elif args.data.src == 'ThinNormal':
+    #         mu = tc.zeros(args.data.dim)
+    #         sig = tc.ones(args.data.dim) * 1e-1
+    #         sig[0] = 1.0
+    #         p_params = {'mu': mu, 'sig': sig}
+    #     else:
+    #         raise NotImplementedError
 
-        if args.data.tar == 'FatNormal':
-            mu = tc.zeros(args.data.dim)
-            sig = tc.ones(args.data.dim) * 1e-1 # 1e-4
-            sig[0] = 5.0
-            q_params = {'mu': mu, 'sig': sig}
-        elif args.data.tar == 'ThinNormal':
-            mu = tc.zeros(args.data.dim)
-            sig = tc.ones(args.data.dim) * 1e-1 # 1e-4
-            sig[0] = 1.0
-            q_params = {'mu': mu, 'sig': sig}
-        else:
-            raise NotImplementedError
+    #     if args.data.tar == 'FatNormal':
+    #         mu = tc.zeros(args.data.dim)
+    #         sig = tc.ones(args.data.dim) * 1e-1
+    #         sig[0] = 5.0
+    #         q_params = {'mu': mu, 'sig': sig}
+    #     elif args.data.tar == 'ThinNormal':
+    #         mu = tc.zeros(args.data.dim)
+    #         sig = tc.ones(args.data.dim) * 1e-1 
+    #         sig[0] = 1.0
+    #         q_params = {'mu': mu, 'sig': sig}
+    #     else:
+    #         raise NotImplementedError
         
-        mdl_iw = IWTwoNormals(p_params=p_params, q_params=q_params, device=args.device)
-        print(f"## true iw_max = {mdl_iw.iw_max}")
-        print()
-    else:
-        pass
-        # ## estimate IW
+    #     mdl_iw = IWTwoNormals(p_params=p_params, q_params=q_params, device=args.device)
+    #     print(f"## true iw_max = {mdl_iw.iw_max}")
+    #     print()
+    # else:
+    #     pass
+    #     # ## estimate IW
 
-        # ## init the source discriminator model
-        # print("## init models for iw: %s"%(args.model.sd))
-        # mdl_sd = model.SourceDisc(getattr(model, args.model.sd)(args.model.feat_dim, 2), mdl)
-        # assert(args.model_sd.path_pretrained is not None)
-        # print(f'## load a pretrained source discriminator at {args.model_sd.path_pretrained}')
-        # mdl_sd.load_state_dict(tc.load(args.model_sd.path_pretrained, map_location=tc.device('cpu')), strict=False)
-        # mdl_sd.eval()
-        # print()
+    #     # ## init the source discriminator model
+    #     # print("## init models for iw: %s"%(args.model.sd))
+    #     # mdl_sd = model.SourceDisc(getattr(model, args.model.sd)(args.model.feat_dim, 2), mdl)
+    #     # assert(args.model_sd.path_pretrained is not None)
+    #     # print(f'## load a pretrained source discriminator at {args.model_sd.path_pretrained}')
+    #     # mdl_sd.load_state_dict(tc.load(args.model_sd.path_pretrained, map_location=tc.device('cpu')), strict=False)
+    #     # mdl_sd.eval()
+    #     # print()
 
-        # ## calibrate the source discriminator model
-        # if args.train_predset.method == 'pac_predset_temp_rejection':
-        #     mdl_sd = model.Temp(mdl_sd)
-        #     l = uncertainty.TempScalingLearner(mdl_sd, args.cal_sd, name_postfix='srcdisc_temp')
-        #     print("## test before calibration...")
-        #     l.test(ds_dom.test, ld_name='domain data', verbose=True)
-        #     print("## calibrate...")
-        #     l.train(ds_dom.val, ds_dom.val)
-        #     print("## test after calibration...")
-        #     l.test(ds_dom.test, ld_name='domain data', verbose=True)
-        #     print()
+    #     # ## calibrate the source discriminator model
+    #     # if args.train_predset.method == 'pac_predset_temp_rejection':
+    #     #     mdl_sd = model.Temp(mdl_sd)
+    #     #     l = uncertainty.TempScalingLearner(mdl_sd, args.cal_sd, name_postfix='srcdisc_temp')
+    #     #     print("## test before calibration...")
+    #     #     l.test(ds_dom.test, ld_name='domain data', verbose=True)
+    #     #     print("## calibrate...")
+    #     #     l.train(ds_dom.val, ds_dom.val)
+    #     #     print("## test after calibration...")
+    #     #     l.test(ds_dom.test, ld_name='domain data', verbose=True)
+    #     #     print()
 
-        # ## eval IW
-        # l = learning.ClsLearner(mdl_sd, args.train_sd, name_postfix='srcdisc')
-        # print("## test...(skip)")
-        # #l.test(ds_dom.test, ld_name='domain dataset', verbose=True)
-        # print()
+    #     # ## eval IW
+    #     # l = learning.ClsLearner(mdl_sd, args.train_sd, name_postfix='srcdisc')
+    #     # print("## test...(skip)")
+    #     # #l.test(ds_dom.test, ld_name='domain dataset', verbose=True)
+    #     # print()
 
-        # ## init the IW model
-        # mdl_cal = model.NoCal(mdl_sd, cal_target=args.cal_sd.cal_target)    
-        # mdl_iw = model.IW(mdl_cal, bound_type='mean') ## choose the uncalibrated iw
-        # mdl_iw.eval()
+    #     # ## init the IW model
+    #     # mdl_cal = model.NoCal(mdl_sd, cal_target=args.cal_sd.cal_target)    
+    #     # mdl_iw = model.IW(mdl_cal, bound_type='mean') ## choose the uncalibrated iw
+    #     # mdl_iw.eval()
 
-        # ## estimate the maximum IW before calibration
-        # if args.train_predset.method == 'pac_predset_temp_rejection':
-        #     # always recompute max since max can be changed as a calibration set changes
-        #     iw_max = uncertainty.estimate_iw_max(mdl_iw, ds_dom.train, args.device)
-        # else:            
-        #     fn_iw_max = os.path.join(os.path.dirname(args.model_sd.path_pretrained), f'iw_max_src_{args.data.src}_tar_{args.data.tar}_alpha_0.0.pk')
-        #     if os.path.exists(fn_iw_max):
-        #         iw_max = pickle.load(open(fn_iw_max, 'rb'))
-        #         print(f'## iw_max loaded from {fn_iw_max}')
-        #     else:
-        #         iw_max = uncertainty.estimate_iw_max(mdl_iw, ds_dom.train, args.device, alpha=0.0)
-        #         pickle.dump(iw_max, open(fn_iw_max, 'wb'))
-        # mdl_iw.iw_max.data = tc.tensor(iw_max.item(), device=mdl_iw.iw_max.data.device)
-        # print("## iw_max over train = %f (before cal)"%(iw_max))
-        # print()
+    #     # ## estimate the maximum IW before calibration
+    #     # if args.train_predset.method == 'pac_predset_temp_rejection':
+    #     #     # always recompute max since max can be changed as a calibration set changes
+    #     #     iw_max = uncertainty.estimate_iw_max(mdl_iw, ds_dom.train, args.device)
+    #     # else:            
+    #     #     fn_iw_max = os.path.join(os.path.dirname(args.model_sd.path_pretrained), f'iw_max_src_{args.data.src}_tar_{args.data.tar}_alpha_0.0.pk')
+    #     #     if os.path.exists(fn_iw_max):
+    #     #         iw_max = pickle.load(open(fn_iw_max, 'rb'))
+    #     #         print(f'## iw_max loaded from {fn_iw_max}')
+    #     #     else:
+    #     #         iw_max = uncertainty.estimate_iw_max(mdl_iw, ds_dom.train, args.device, alpha=0.0)
+    #     #         pickle.dump(iw_max, open(fn_iw_max, 'wb'))
+    #     # mdl_iw.iw_max.data = tc.tensor(iw_max.item(), device=mdl_iw.iw_max.data.device)
+    #     # print("## iw_max over train = %f (before cal)"%(iw_max))
+    #     # print()
 
 
-        # ## calibrate the IW model
-        # if args.train_predset.method == 'pac_predset_worst_rejection' or args.train_predset.method == 'pac_predset_mean_rejection':
-        #     print("## calibrate IW...")
+    #     # ## calibrate the IW model
+    #     # if args.train_predset.method == 'pac_predset_worst_rejection' or args.train_predset.method == 'pac_predset_mean_rejection':
+    #     #     print("## calibrate IW...")
 
-        #     fn_bin_edges = os.path.join(os.path.dirname(args.model_sd.path_pretrained), f'bin_edges_n_bins_{args.model_iwcal.n_bins}_src_equal_mass.pk')
+    #     #     fn_bin_edges = os.path.join(os.path.dirname(args.model_sd.path_pretrained), f'bin_edges_n_bins_{args.model_iwcal.n_bins}_src_equal_mass.pk')
 
-        #     if os.path.exists(fn_bin_edges):
-        #         bin_edges = pickle.load(open(fn_bin_edges, 'rb'))
-        #         print(f'## bin_edges loaded from {fn_bin_edges}:', bin_edges)
-        #         assert(len(bin_edges) == args.model_iwcal.n_bins+1)
-        #     else:
-        #         bin_edges = uncertainty.find_bin_edges_equal_mass_src(ds_src.train, args.model_iwcal.n_bins, mdl_iw, args.device)
-        #         pickle.dump(bin_edges, open(fn_bin_edges, 'wb'))
-        #         print(f'## bin_edges saved to {fn_bin_edges}:', bin_edges)
+    #     #     if os.path.exists(fn_bin_edges):
+    #     #         bin_edges = pickle.load(open(fn_bin_edges, 'rb'))
+    #     #         print(f'## bin_edges loaded from {fn_bin_edges}:', bin_edges)
+    #     #         assert(len(bin_edges) == args.model_iwcal.n_bins+1)
+    #     #     else:
+    #     #         bin_edges = uncertainty.find_bin_edges_equal_mass_src(ds_src.train, args.model_iwcal.n_bins, mdl_iw, args.device)
+    #     #         pickle.dump(bin_edges, open(fn_bin_edges, 'wb'))
+    #     #         print(f'## bin_edges saved to {fn_bin_edges}:', bin_edges)
 
-        #     args.cal_iw.bin_edges = bin_edges
+    #     #     args.cal_iw.bin_edges = bin_edges
 
-        #     ## calibrate IWs
-        #     if args.train_predset.method == 'pac_predset_worst_rejection':
+    #     #     ## calibrate IWs
+    #     #     if args.train_predset.method == 'pac_predset_worst_rejection':
 
-        #         mdl_iw = model.IWCal(mdl_iw, n_bins=args.model_iwcal.n_bins, delta=args.model_iwcal.delta)
-        #         l = uncertainty.IWBinning(mdl_iw, args.cal_iw, name_postfix='iwcal_hist')
-        #         l.train([ds_src.val, ds_tar.val])
-        #         #l.test([ds_src.test, ds_tar.test], ld_name='domain dataset', verbose=True)
+    #     #         mdl_iw = model.IWCal(mdl_iw, n_bins=args.model_iwcal.n_bins, delta=args.model_iwcal.delta)
+    #     #         l = uncertainty.IWBinning(mdl_iw, args.cal_iw, name_postfix='iwcal_hist')
+    #     #         l.train([ds_src.val, ds_tar.val])
+    #     #         #l.test([ds_src.test, ds_tar.test], ld_name='domain dataset', verbose=True)
 
-        #     elif args.train_predset.method == 'pac_predset_mean_rejection':
+    #     #     elif args.train_predset.method == 'pac_predset_mean_rejection':
 
-        #         mdl_iw = model.IWCal(mdl_iw, n_bins=args.model_iwcal.n_bins, delta=args.model_iwcal.delta)
-        #         l = uncertainty.IWBinningNaive(mdl_iw, args.cal_iw, name_postfix='iwcal_hist_naive')
-        #         l.train([ds_src.val, ds_tar.val])
+    #     #         mdl_iw = model.IWCal(mdl_iw, n_bins=args.model_iwcal.n_bins, delta=args.model_iwcal.delta)
+    #     #         l = uncertainty.IWBinningNaive(mdl_iw, args.cal_iw, name_postfix='iwcal_hist_naive')
+    #     #         l.train([ds_src.val, ds_tar.val])
 
-        #     print()
+    #     #     print()
 
 
     ## construct and evaluate a prediction set
@@ -264,7 +231,10 @@ def run(args):
         
     elif args.train_predset.method == 'weighted_split_cp':
         # estimate IWs
-        args, mdl_iw = uncertainty.est_iw_srcdisc(args, mdl, ds_dom)
+        if args.model.iw_true:
+            mdl_iw = uncertainty.get_two_gaussian_true_iw(args)
+        else:
+            args, mdl_iw = uncertainty.est_iw_srcdisc(args, mdl, ds_dom)
         # construct a prediction set
         mdl_predset = model.WeightedSplitCPCls(mdl, mdl_iw, args.model_predset.alpha, args.model_predset.delta, args.model_predset.m)
         l = uncertainty.WeightedSplitCPConstructor(mdl_predset, params=args.train_predset, mdl_iw=mdl_iw)
@@ -274,7 +244,10 @@ def run(args):
         
     elif args.train_predset.method == 'pac_predset_maxiw':
         # estimate IWs
-        args, mdl_iw = uncertainty.est_iw_srcdisc(args, mdl, ds_dom)
+        if args.model.iw_true:
+            mdl_iw = uncertainty.get_two_gaussian_true_iw(args)
+        else:
+            args, mdl_iw = uncertainty.est_iw_srcdisc(args, mdl, ds_dom)
         # construct a prediction set
         mdl_predset = model.PredSetCls(mdl, args.model_predset.eps, args.model_predset.delta, args.model_predset.m)
         l = uncertainty.PredSetConstructor_maxiw(mdl_predset, args.train_predset, model_iw=mdl_iw)
@@ -284,7 +257,10 @@ def run(args):
         
     elif args.train_predset.method == 'pac_predset_rejection':
         # estimate IWs
-        args, mdl_iw = uncertainty.est_iw_srcdisc(args, mdl, ds_dom)
+        if args.model.iw_true:
+            mdl_iw = uncertainty.get_two_gaussian_true_iw(args)
+        else:
+            args, mdl_iw = uncertainty.est_iw_srcdisc(args, mdl, ds_dom)
         # construct a prediction set
         mdl_predset = model.PredSetCls(mdl, args.model_predset.eps, args.model_predset.delta, args.model_predset.m)
         l = uncertainty.PredSetConstructor_rejection(mdl_predset, args.train_predset, model_iw=mdl_iw)
@@ -294,7 +270,10 @@ def run(args):
         
     elif args.train_predset.method == 'pac_predset_temp_rejection':
         # estimate IWs
-        args, mdl_iw = uncertainty.est_iw_temp(args, mdl, ds_dom)
+        if args.model.iw_true:
+            mdl_iw = uncertainty.get_two_gaussian_true_iw(args)
+        else:
+            args, mdl_iw = uncertainty.est_iw_temp(args, mdl, ds_dom)
         # construct a prediction set
         mdl_predset = model.PredSetCls(mdl, args.model_predset.eps, args.model_predset.delta, args.model_predset.m)
         l = uncertainty.PredSetConstructor_rejection(mdl_predset, args.train_predset, model_iw=mdl_iw)
@@ -304,8 +283,11 @@ def run(args):
 
     elif args.train_predset.method == 'pac_predset_mean_rejection':
         # estimate IWs
-        args, mdl_iw = uncertainty.est_iw_bin_mean(args, mdl, ds_src, ds_tar)
-        # construction a prediction set
+        if args.model.iw_true:
+            mdl_iw = uncertainty.get_two_gaussian_true_iw(args)
+        else:
+            args, mdl_iw = uncertainty.est_iw_bin_mean(args, mdl, ds_src, ds_tar)
+        # construct a prediction set
         mdl_predset = model.PredSetCls(mdl, args.model_predset.eps, args.model_predset.delta, args.model_predset.m)
         l = uncertainty.PredSetConstructor_rejection(mdl_predset, args.train_predset, model_iw=mdl_iw)
         l.train(ds_src.val)
@@ -314,8 +296,11 @@ def run(args):
     
     elif args.train_predset.method == 'pac_predset_worst_rejection':
         # estimate IWs
-        args, mdl_iw = uncertainty.est_iw_bin_interval(args, mdl, ds_src, ds_tar)
-        # construction a prediction set
+        if args.model.iw_true:
+            mdl_iw = uncertainty.get_two_gaussian_true_iw(args)
+        else:
+            args, mdl_iw = uncertainty.est_iw_bin_interval(args, mdl, ds_src, ds_tar)
+        # construct a prediction set
         mdl_predset = model.PredSetCls(mdl, args.model_predset.eps, args.model_predset.delta, args.model_predset.m)
         l = uncertainty.PredSetConstructor_worst_rejection(mdl_predset, args.train_predset, model_iw=mdl_iw)
         l.train(ds_src.val)
