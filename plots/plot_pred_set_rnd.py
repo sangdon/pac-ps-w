@@ -15,7 +15,6 @@ if __name__ == '__main__':
     ## parameters
 
     ## meta args
-    #parser.add_argument('--exp_name', type=str, required=True)
     parser.add_argument('--snapshot_root', type=str, default='snapshots')
     parser.add_argument('--dataset', type=str, default='domainnet_src_DomainNetAll_tar_DomainNetSketch_da')
     parser.add_argument('--trueiw', action='store_true')
@@ -23,7 +22,7 @@ if __name__ == '__main__':
     parser.add_argument('--eps', type=str, default='0.1')
     parser.add_argument('--delta', type=str, default='1e-5')
     parser.add_argument('--fontsize', type=int, default=20)
-    parser.add_argument('--figsize', type=float, nargs=2, default=[6.4*1.5, 4.8])
+    parser.add_argument('--figsize', type=float, nargs=2, default=[5.0, 4.8])
     args = parser.parse_args()
     
     fontsize = args.fontsize
@@ -38,10 +37,9 @@ if __name__ == '__main__':
         ]
     else:    
          method_name_list = [
-             ('naive', 'CP-IID'),
+             ('naive', 'PS'),
              ('wscp', 'WSCI'),
              ('maxiw', 'PS-C'),
-             ('rejection', 'PS-R'),
              ('worst_rejection', 'PS-W'),
         ]
     exp_name_list = ['exp_' + args.dataset + '_' + n[0] + f'_m_{args.m}_eps_{args.eps}_delta_{args.delta}' for n in method_name_list]
@@ -58,9 +56,12 @@ if __name__ == '__main__':
         print(f'[method = {n[1]}] #exps = {len(fn_stats)}')
     
     ## sanity check
+    i_val = None
     for i, l in enumerate(stats_list):
         if len(l) > 0:
             i_val = i
+    assert i_val is not None, f'No data to plot'
+        
     eps = stats_list[i_val][0]['eps'].item()
     delta = stats_list[i_val][0]['delta'].item()
     n = stats_list[i_val][0]['n'].item()    
