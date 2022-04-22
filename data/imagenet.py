@@ -31,46 +31,6 @@ def label_to_name(root, label_to_wnid):
     return names
 
 
-# class ImageNet(data.ImageData):
-#     def __init__(
-#             self, root, batch_size,
-#             image_size=None, color=True,
-#             train_rnd=True, val_rnd=False, test_rnd=False, ## train is randomized; it conducts basic random augmentations
-#             train_aug=False, val_aug=False, test_aug=False,
-#             normalize=True,
-#             aug_types=[],
-#             num_workers=4,
-#             domain_label=None,
-#             sample_size={'train': None, 'val': None, 'test': None},
-#             seed=None, 
-#             **kwargs,
-#     ):
-#         assert(color)
-        
-
-#         # ## compute label histogram
-#         # ##TODO
-#         # names_val = [n.split('/')[-1] for n in glob.glob(os.path.join(root, 'val', 'n*'))]
-#         # hist_names = {n: len(glob.glob(os.path.join(root, 'val', n, '*.JPEG'))) for n in names_val}
-#         # print(hist_names)
-#         # print(sorted(hist_names.values()))
-#         # sys.exit()
-                  
-#         super().__init__(
-#             root=root, batch_size=batch_size,
-#             #image_size=image_size, color=color,
-#             domain_label=domain_label,
-#             train_rnd=train_rnd, val_rnd=val_rnd, test_rnd=test_rnd,
-#             train_aug=train_aug, val_aug=val_aug, test_aug=test_aug,
-#             aug_types=aug_types,
-#             num_workers=num_workers,
-#             tforms_dft=tforms_dft, tforms_dft_rnd=tforms_dft_rnd,
-#         )
-
-#         ## add id-name map
-#         self.names = label_to_name(root, self.test.dataset.classes)
-
-
 class ImageNet(data.ClassificationData):
     def __init__(
             self, root, batch_size,

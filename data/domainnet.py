@@ -64,14 +64,12 @@ class DomainNet:
             tforms_dft = [
                 ctforms.Resize(256),
                 ctforms.CenterCrop(image_size),
-                #ctforms.Grayscale(3 if color else 1),
                 ctforms.ToTensor(),
                 ctforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]) if normalize else ctform.Identity(),
             ]
             tforms_dft_rnd = [
                 ctforms.RandomResizedCrop(image_size),
                 ctforms.RandomHorizontalFlip(),
-                #ctforms.Grayscale(3 if color else 1),
                 ctforms.ToTensor(),
                 ctforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]) if normalize else ctform.Identity(),
             ]

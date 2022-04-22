@@ -1,6 +1,6 @@
 from .util import *
 from .resnet import ResNet18, ResNet101, ResNet152, ResNetFeat
-from .temp import Temp
+#from .temp import Temp
 from .hist import HistBin
 from .pred_set import PredSet, PredSetCls, PredSetReg
 #from .pred_set_max import PredSetMax

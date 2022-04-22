@@ -33,7 +33,7 @@ def parse_args():
     parser.add_argument('--data.src', type=str, required=True)
     parser.add_argument('--data.tar', type=str, required=True)
     parser.add_argument('--data.n_labels', type=int, default=2)
-    #parser.add_argument('--data.img_size', type=int, nargs=3, default=(2048))
+    parser.add_argument('--data.img_size', type=int, nargs=3)
     parser.add_argument('--data.dim', type=int, nargs='*', default=[2048])
     #parser.add_argument('--data.aug_src', type=str, nargs='*')
     #parser.add_argument('--data.aug_tar', type=str, nargs='*')
