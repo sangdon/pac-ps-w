@@ -132,9 +132,6 @@ class DomainNet:
         
 class DomainNetClipart(DomainNet):
     def __init__(self, *args, **kwargs):
-        # args = list(args)
-        # args[0] = args[0].replace('clipart', '')
-        # args[0] = [os.path.join(args[0], 'clipart')]
         kwargs['root'] = kwargs['root'].replace('clipart', '')
         kwargs['root'] = [os.path.join(kwargs['root'], 'clipart')]
         
@@ -143,9 +140,6 @@ class DomainNetClipart(DomainNet):
         
 class DomainNetInfograph(DomainNet):
     def __init__(self, *args, **kwargs):
-        # args = list(args)
-        # args[0] = args[0].replace('infograph', '')
-        # args[0] = [os.path.join(args[0], 'infograph')]
         kwargs['root'] = kwargs['root'].replace('infograph', '')
         kwargs['root'] = [os.path.join(kwargs['root'], 'infograph')]
         
@@ -154,9 +148,6 @@ class DomainNetInfograph(DomainNet):
         
 class DomainNetPainting(DomainNet):
     def __init__(self, *args, **kwargs):
-        # args = list(args)
-        # args[0] = args[0].replace('painting', '')
-        # args[0] = [os.path.join(args[0], 'painting')]
         kwargs['root'] = kwargs['root'].replace('painting', '')
         kwargs['root'] = [os.path.join(kwargs['root'], 'painting')]
 
@@ -165,9 +156,6 @@ class DomainNetPainting(DomainNet):
 
 class DomainNetQuickdraw(DomainNet):
     def __init__(self, *args, **kwargs):
-        # args = list(args)
-        # args[0] = args[0].replace('quickdraw', '')
-        # args[0] = [os.path.join(args[0], 'quickdraw')]
         kwargs['root'] = kwargs['root'].replace('quickdraw', '')
         kwargs['root'] = [os.path.join(kwargs['root'], 'quickdraw')]
 
@@ -176,10 +164,6 @@ class DomainNetQuickdraw(DomainNet):
         
 class DomainNetReal(DomainNet):
     def __init__(self, *args, **kwargs):
-        # args = list(args)
-        # args[0] = args[0].replace('real', '')
-        # args[0] = [os.path.join(args[0], 'real')]
-        
         kwargs['root'] = kwargs['root'].replace('real', '')
         kwargs['root'] = [os.path.join(kwargs['root'], 'real')]
 
@@ -188,10 +172,6 @@ class DomainNetReal(DomainNet):
 
 class DomainNetSketch(DomainNet):
     def __init__(self, *args, **kwargs):
-        # args = list(args)
-        # args[0] = args[0].replace('sketch', '')
-        # args[0] = [os.path.join(args[0], 'sketch')]
-
         kwargs['root'] = kwargs['root'].replace('sketch', '')
         kwargs['root'] = [os.path.join(kwargs['root'], 'sketch')]
 
@@ -200,10 +180,6 @@ class DomainNetSketch(DomainNet):
 
 class DomainNetAll(DomainNet):
     def __init__(self, *args, **kwargs):
-        # args = list(args)
-        # args[0] = args[0].replace('all', '')
-        # args[0] = [os.path.join(args[0], dn) for dn in DOMAIN_LIST]
-
         kwargs['root'] = kwargs['root'].replace('all', '')
         kwargs['root'] = [os.path.join(kwargs['root'], dn) for dn in DOMAIN_LIST]
 

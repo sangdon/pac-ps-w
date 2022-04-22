@@ -65,22 +65,3 @@ def loss_set_error(x, y, mdl, reduction='mean', device=tc.device('cpu')):
     loss_vec = (mdl.membership(x, y) == 0).float()
     loss = reduce(loss_vec, reduction)
     return {'loss': loss}
-    
-         
-
-##
-## regression
-##
-def loss_nll(x, y, model, reduction='mean', device=tc.device('cpu'), normalizer=1.0):
-    x, y = to_device(x, device), to_device(y, device)
-    out = model(x)
-    ##assumption: gaussian
-    #print("sig min, max:", out['logvar'].min().exp().sqrt(), out['logvar'].max().exp().sqrt())
-    #loss_vec = neg_log_prob(out['mu']/normalizer, out['logvar']-tc.tensor(normalizer).pow(2.0).log(), y/normalizer)
-    loss_vec = neg_log_prob(out['mu'], out['logvar'], y)
-    loss = reduce(loss_vec, reduction)
-
-    #loss = tc.minimum(loss, tc.tensor(1.0, device=loss.device))
-    #print('loss:', loss)
-    #print()
-    return {'loss': loss}

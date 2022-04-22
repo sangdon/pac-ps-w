@@ -3,7 +3,6 @@ import numpy as np
 
 import torch as tc
 import torch.nn as nn
-import torch.tensor as T
 
 from .util import *
 
@@ -15,10 +14,10 @@ class PredSet(nn.Module):
     def __init__(self, mdl, eps=0.0, delta=0.0, n=0):
         super().__init__()
         self.mdl = mdl
-        self.T = nn.Parameter(T(0.0))
-        self.eps = nn.Parameter(T(eps), requires_grad=False)
-        self.delta = nn.Parameter(T(delta), requires_grad=False)
-        self.n = nn.Parameter(T(n), requires_grad=False)
+        self.T = nn.Parameter(tc.tensor(0.0))
+        self.eps = nn.Parameter(tc.tensor(eps), requires_grad=False)
+        self.delta = nn.Parameter(tc.tensor(delta), requires_grad=False)
+        self.n = nn.Parameter(tc.tensor(n), requires_grad=False)
 
     
 class PredSetCls(PredSet):

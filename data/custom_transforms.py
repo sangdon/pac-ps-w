@@ -25,17 +25,6 @@ class ToTensor(CustomTransform):
         self.tf = tforms.ToTensor()
 
     
-# class Normalizer:
-#     def __init__(self, n):
-#         self.n = tc.tensor(n)
-
-        
-#     def __call__(self, x):
-#         img, label = decode_input(x)
-#         img = img / self.n
-#         return (img, label)
-
-    
 class Normalize(CustomTransform):
     def __init__(self, mean, std):
         self.tf = tforms.Normalize(mean, std)

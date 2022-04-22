@@ -15,15 +15,14 @@ if __name__ == '__main__':
     ## parameters
 
     ## meta args
-    #parser.add_argument('--exp_name', type=str, required=True)
     parser.add_argument('--snapshot_root', type=str, default='snapshots')
-    parser.add_argument('--dataset', type=str, default='domainnet_src_DomainNetAll_tar_DomainNetSketch_da_iwcal')
+    parser.add_argument('--dataset', type=str, default='domainnet_src_DomainNetAll_tar_DomainNetSketch_da')
     parser.add_argument('--trueiw', action='store_true')
     parser.add_argument('--m', type=int, default=50000)
     parser.add_argument('--eps', type=str, default='0.1')
     parser.add_argument('--delta', type=str, default='1e-5')
     parser.add_argument('--fontsize', type=int, default=20)
-    parser.add_argument('--figsize', type=float, nargs=2, default=[6.4*1.5, 4.8])
+    parser.add_argument('--figsize', type=float, nargs=2, default=[5.0, 4.8])
     args = parser.parse_args()
     
     fontsize = args.fontsize
@@ -31,48 +30,17 @@ if __name__ == '__main__':
 
     if args.trueiw:
         method_name_list = [
-            #('desired', 'upper bound'),
-            #('desired_eff', 'desired-eff'),
-            
-            ('naive', 'CP-IID'),
-            ('wscp', 'WSCP'),
-            ('worstiw', 'CP-C'),
-            #('worstbinopt2', 'WBO-2E'),
-            #('worstbinopt5', 'WBO-5E'),
-            #('mgf2', 'MGF-2E'),
-            #('mgf10', 'MGF-10E'),
-            #('HCP', 'CP+H'),
-            #('EBCP', 'CP+EB'),
-            #('wbin', 'CP+IWBin'),
-            
-            #('resample', 'resample'),
-            #('bootstrap', 'BS'),
-            #('resampling_bootstrap', 'BS-IR'),
-
-            ('rejection', 'RSCP'),
-            #('worst_rejection', 'RSCP-WIW'),            
+            ('naive', 'PS'),
+            ('wscp', 'WSCI'),
+            ('maxiw', 'PS-C'),
+            ('rejection', 'PS-R'),
         ]
     else:    
          method_name_list = [
-            #('desired', 'upper bound'),
-            #('desired_eff', 'desired-eff'),
-            ('naive', 'CP-IID'),
-            ('wscp', 'WSCP'),
-            ('worstiw', 'CP-C'),
-            #('worstbinopt2', 'WBO-2E'),
-            #('worstbinopt5', 'WBO-5E'),
-            #('mgf2', 'MGF-2E'),
-            #('mgf10', 'MGF-10E'),
-            #('HCP', 'CP+H'),
-            #('EBCP', 'CP+EB'),
-            #('wbin', 'CP+IWBin'),
-             
-            #('resample', 'resample'),
-            #('bootstrap', 'BS'),
-            #('resampling_bootstrap', 'BS-IR'),
-             
-            ('rejection', 'RSCP'),
-            ('worst_rejection', 'RSCP-WIW'),
+             ('naive', 'PS'),
+             ('wscp', 'WSCI'),
+             ('maxiw', 'PS-C'),
+             ('worst_rejection', 'PS-W'),
         ]
     exp_name_list = ['exp_' + args.dataset + '_' + n[0] + f'_m_{args.m}_eps_{args.eps}_delta_{args.delta}' for n in method_name_list]
     name_list = [n[1] for n in method_name_list]
@@ -82,31 +50,25 @@ if __name__ == '__main__':
     
     ## load
     stats_rnd_fn_list = [glob.glob(os.path.join(args.snapshot_root, exp_name+'_expid_*', 'stats_pred_set.pk')) for exp_name in exp_name_list]
-
-    
-    # for l in stats_rnd_fn_list:
-    #     for fn in l:
-    #         print(fn)
-    #         x = pickle.load(open(fn, 'rb'))
-    # sys.exit()
     stats_list = [[pickle.load(open(fn, 'rb')) for fn in l] for l in stats_rnd_fn_list]
 
     for n, fn_stats in zip(method_name_list, stats_rnd_fn_list):
         print(f'[method = {n[1]}] #exps = {len(fn_stats)}')
     
     ## sanity check
+    i_val = None
     for i, l in enumerate(stats_list):
         if len(l) > 0:
             i_val = i
+    assert i_val is not None, f'No data to plot'
+        
     eps = stats_list[i_val][0]['eps'].item()
     delta = stats_list[i_val][0]['delta'].item()
     n = stats_list[i_val][0]['n'].item()    
 
     assert(all([eps == e for e in [s['eps'] for stat in stats_list for s in stat]]))
-    #assert(all([abs(delta - d) < 1e-8 or abs(delta/2.0 - d) < 1e-8 for d in [s['delta'] for stat in stats_list for s in stat]]))
     assert(all([n == n for n in [s['n'] for stat in stats_list for s in stat]]))
     assert(abs(eps - float(args.eps)) < 1e-8)
-    #assert(abs(delta - float(args.delta)) < 1e-8)
     assert(n == args.m)
     
     print('eps = %f, delta = %f, n = %d'%(eps, delta, n))
@@ -122,8 +84,6 @@ if __name__ == '__main__':
         plt.boxplot(error_list, whis=np.inf, showmeans=True,
                     boxprops=dict(linewidth=3), medianprops=dict(linewidth=3.0))
         h = plt.hlines(eps, 0.5, 0.5+len(error_list), colors='k', linestyles='dashed', label='$\epsilon = %.2f$'%(eps))
-        #plt.gca().tick_params(labelsize=fontsize)
-        #plt.gca().set_xticks(np.arange(len(error_list)))
         plt.gca().set_xticklabels(name_list, fontsize=fontsize)
         plt.ylabel('prediction set error', fontsize=fontsize)
         plt.ylim(bottom=0.0)

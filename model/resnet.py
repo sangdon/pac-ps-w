@@ -6,6 +6,7 @@ from torch import nn
 import torch.nn.functional as F
 from torchvision import models
 import threading
+import re
 
 class ResNet(nn.Module):
     def __init__(self, n_labels, resnet_id, path_pretrained=None):
@@ -17,8 +18,7 @@ class ResNet(nn.Module):
             self.model = getattr(models, 'resnet%d'%(resnet_id))(num_classes=n_labels, pretrained=True)
         else:
             self.model = getattr(models, 'resnet%d'%(resnet_id))(num_classes=n_labels, pretrained=False)
-            warnings.warn('use a unified model structure for model loading')
-            self.model.load_state_dict({k.replace('model.', '').replace('module.', '').replace('mdl.', ''): v for k, v in
+            self.model.load_state_dict({k.replace('module.', '').replace('mdl.', '').replace('model.', ''): v for k, v in
                                         tc.load(path_pretrained, map_location=tc.device('cpu')).items()})
 
         self.feat = {}
