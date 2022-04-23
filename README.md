@@ -108,7 +108,7 @@ For the box plots, run the following:
 ```
 ./scripts/run_plot_twonormals.sh
 ```
-Scripts for ImageNet is comming soon.
+Scripts for ImageNet are comming soon.
           
 ## Citation
 
