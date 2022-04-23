@@ -23,6 +23,12 @@ In particular, `PS-W` exploits rejection sampling with the worst importance weig
 The following teaser summarizes our results.
 <p align="center"><img src=".github/teaser.png" width="800">
           
+## Requirements
+
+torch>=1.10 is required, but older version might work; check the following:
+```
+pip3 install -r requirements.txt
+```
           
 
 ## DomainNet for Rate Shift
@@ -83,8 +89,27 @@ l.train(ds_src.val)
 # Step 3: evaluate the constructed prediction set
 l.test(ds_tar.test, ld_name=args.data.tar, verbose=True)
 ```
+### Plot
+The following script draws box plots on prediction set error and size for all 7 shifts of DomainNet. 
+```
+./scripts/run_plot_domainnet.sh
+```
 
-
+          
+## Other Datasets
+For the synthetic Guassian dataset with the true IWs and estimated IWs, run the following scripts, respectively:
+```
+./scripts/run_main_cls_twonormals_trueiw.sh
+```
+```
+./scripts/run_main_cls_twonormals.sh
+```
+For the box plots, run the following:
+```
+./scripts/run_plot_twonormals.sh
+```
+Scripts for ImageNet is comming soon.
+          
 ## Citation
 
 ```
