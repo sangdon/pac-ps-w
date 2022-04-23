@@ -25,7 +25,7 @@ The following teaser summarizes our results.
           
 ## Requirements
 
-torch>=1.10 is required, but older version might work; check the following:
+torch>=1.10 is required, but older versions might work; check the following:
 ```
 pip3 install -r requirements.txt
 ```
