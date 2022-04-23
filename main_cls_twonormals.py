@@ -50,7 +50,7 @@ def parse_args():
     parser.add_argument('--model.base', type=str, default='Linear')
     #parser.add_argument('--model.base_feat', type=str, default='ResNetFeat')
     parser.add_argument('--model.path_pretrained', type=str)
-    #parser.add_argument('--model.feat_dim', type=int, default=2048)
+    parser.add_argument('--model.feat_dim', type=int, default=2048)
     parser.add_argument('--model.cal', type=str, default='Temp')
     parser.add_argument('--model.sd', type=str, default='MidFNN')
     parser.add_argument('--model.sd_cal', type=str, default='HistBin')

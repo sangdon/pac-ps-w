@@ -78,5 +78,5 @@ def get_two_gaussian_true_iw(args):
         raise NotImplementedError
         
     mdl_iw = IWTwoNormals(p_params=p_params, q_params=q_params, device=args.device)
-
+    return mdl_iw
         
